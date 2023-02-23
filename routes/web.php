@@ -109,6 +109,13 @@ Route::group(["prefix"=>"payments", "as"=>"payments."], function(){
             // }
         //doc end
 
+        //=================================================================
+        // You can now create payment intent + subscription or whatever using above payment intent
+        // Note you have to save payment_method (payment method id) returned in response of payment intent
+        // that payment method id will be use to determine which payment method will be use to charge your customer.
+        // you can hit test-execute-payment-off-session route to test things
+        // before hit you have to set env as per response of setup intent 
+
 
         return [
             "setup_intent"=>$setup_intent,//id,
