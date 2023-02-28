@@ -1,7 +1,10 @@
 <?php
 
+use App\Helpers\Payment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Models\User;
+use Carbon\Carbon;
 
 /*
 |--------------------------------------------------------------------------
@@ -22,15 +25,19 @@ Route::get('/', function () {
 Route::group(["prefix"=>"payments", "as"=>"payments."], function(){
     //step 1
     Route::post("setup-intents", function(Request $request){
+        $customerName = $request->get("customer_name");
+        $customerEmail = $request->get("customer_email");
+        $customerPhone = $request->get("customer_phone");
+
         $stripe = new \Stripe\StripeClient(config("payment.STRIPE_SECRET_KEY")); //secret key
 
         //step 01
         //Create Customer
         $customer = $stripe->customers->create([
-            'name'=>"Developer Rijan",
-            "phone"=>"+8801933388899",
+            'name'=>$customerName,
+            "phone"=>$customerPhone,
             'description' =>"Test Customer",
-            'email' => "developerrijan@gmail.com"
+            'email' => $customerEmail
         ]);
 
         if(!isset($customer["id"]) || $customer["id"] == ''){
@@ -117,81 +124,26 @@ Route::group(["prefix"=>"payments", "as"=>"payments."], function(){
         // before hit you have to set env as per response of setup intent 
 
 
+        // return [
+        //     "setup_intent"=>$setup_intent,//id,
+        //     "setup_intent_client_secret"=>$setup_intent_client_secret,
+        //     "redirect_status"=>$redirect_status,
+        //     "intent"=>$intent
+        // ];
+
+        if(isset($intent['id']) && $intent['status'] === "succeeded"){
+            return Payment::chargePayment($intent, $stripe);
+        }
+
         return [
-            "setup_intent"=>$setup_intent,//id,
-            "setup_intent_client_secret"=>$setup_intent_client_secret,
-            "redirect_status"=>$redirect_status,
+            "msg"=>"Verifying intent has been failed",
             "intent"=>$intent
         ];
 
     })->name("setup.intents.verify");
 });
 
-Route::get("test-execute-payment-off-session", function(){
-    $stripe = new \Stripe\StripeClient(config("payment.STRIPE_SECRET_KEY"));
-
-    try {
-        //do one time charge
-        $paymentIntent = $stripe->paymentIntents->create([
-            "amount"=>30 * 100,//convert to cents
-            "currency"=>"gbp",
-            "payment_method_types"=>["card"],//optional
-            "description"=>"One Time Charge - Admission Fee",
-            'customer' => config("payment.STRIPE_TEST_CUSTOMER_ID"),
-            "payment_method"=>config("payment.STRIPE_TEST_PAYMENT_METHOD_ID"),
-            'off_session' => true,
-            'confirm' => true
-        ]);
-
-        if(!isset($paymentIntent['status'])){
-            return "Creating payment intent failed";
-        }
-        //verify the intent
-
-        //do subscription
-        $subscription = $stripe->subscriptions->create([
-            'customer' => config("payment.STRIPE_TEST_CUSTOMER_ID"),
-            'items' => [
-              ['price' => config("payment.STRIPE_SUBSCRIPTION_PRICE_ID")],
-            ],
-            "collection_method"=>"charge_automatically",
-            "default_payment_method"=>config("payment.STRIPE_TEST_PAYMENT_METHOD_ID"),//STRIPE SUBSCRIPTION PRODUCT PRICE ID
-            "currency"=>"gbp",
-            "description"=>"Testing subscription server side",
-            "payment_settings"=>[
-                "save_default_payment_method"=>"on_subscription"
-            ],
-            'off_session' => true
-            //'confirm' => true
-            // "expand" => ["latest_invoice.payment_intent"],
-            // "application_fee_percent"=>$subscriptionProcessingFee,
-            // "transfer_data" => [
-            //   "destination" => $connected_acc_id
-            // ]
-        ]);
-
-        //verify the subscription id
-
-        return [
-            "succes"=>true,
-            "paymentIntent"=>$paymentIntent,
-            "subscription"=>$subscription
-        ];
-
-    } catch (\Stripe\Exception\CardException $e) {
-        // Error code will be authentication_required if authentication is needed
-        // echo 'Error code is:' . $e->getError()->code;
-        $payment_intent_id = $e->getError()->payment_intent->id;
-        $payment_intent = \Stripe\PaymentIntent::retrieve($payment_intent_id);
-        return [
-            "errorCode"=>$e->getError()->code,
-            "payment_intent_id"=>$payment_intent_id,
-            "payment_intent"=>$payment_intent
-        ];
-    } catch(Exception $e){
-        return "An exception occured please try again later | ({$e->getMessage()})";
-    }
-
-
-    
+Route::get("get", function(){
+    return round(1.33333333333);
 });
+

@@ -10,7 +10,14 @@
   <body>
     <div class="container text-center mt-3">
         <h1 class="text-center">Hello, Lets donate recurring or one time</h1>
-        <button onclick="checkoutProcess(this)" class="btn btn-primary btn-sm">Checkout</button>
+        <form action="" onsubmit="checkoutProcess(event, this)">
+            @csrf
+            <input type="text" name="customer_name" placeholder="Customer Name" class="form-control">
+            <input type="text" name="customer_phone" placeholder="Customer Phone" class="form-control">
+            <input type="text" name="customer_email" placeholder="Customer Email" class="form-control">
+            <button class="btn btn-primary btn-sm">Checkout</button>
+        </form> 
+        
     </div>
 
     <div class="container d-flex justify-content-center mt-5">
@@ -40,27 +47,23 @@
         let elements;
 
         //setup intents -- step 1
-        function checkoutProcess(el){
+        function checkoutProcess(e, form){
+            e.preventDefault();
+            const formData = $(form).serialize()
+
             $.ajax({
                 url:"{{route('payments.setup.intents')}}",
                 dataType:"JSON",
                 method:"POST",
-                data:{
-                    "_token":"{{csrf_token()}}"
-                },
-                beforeSend:function(){
-                    $(el).attr("disabled", true)
-                },
+                data:formData,
                 success:function(res){
                     console.log(res)
                     setupPaymentDetailsCollector(res)
                 },
                 error:function(e){
-                    $(el).removeAttr("disabled")
                     console.log(e)
                 },
                 complete:function(){
-                    $(el).removeAttr("disabled")
                 }
             })
         }
