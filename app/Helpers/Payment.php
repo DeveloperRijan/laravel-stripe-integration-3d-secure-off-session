@@ -3,15 +3,16 @@ namespace App\Helpers;
 
 use Exception;
 use Carbon\Carbon;
+use Stripe\StripeClient;
 
 class Payment{
-    public static function chargePayment($intent, $stripe)
+    public static function chargePayment($intent, StripeClient $stripe)
     {
         try{
             //do subscription and otheres here.....
                 //do one time charge
                 $paymentIntent = $stripe->paymentIntents->create([
-                    "amount"=>54 * 100,//convert to cents 10 + 27 + 13 == 50
+                    "amount"=>50,
                     "currency"=>"gbp",
                     "payment_method_types"=>["card"],//optional
                     "description"=>"One Time Charge - Admission Fee",
@@ -33,7 +34,18 @@ class Payment{
                 $subscription = $stripe->subscriptions->create([
                     'customer' => $intent["customer"],
                     'items' => [
-                        ['price' => config("payment.STRIPE_SUBSCRIPTION_PRICE_ID")],
+                        [
+                            'price' => "price_1MeOQPGEZXyAAL0hM7dQVEJG",
+                            "quantity"=>1
+                        ],
+                        // [
+                        //     'price' => "price_1MhpPiD1o4I6a9G2JJ7zVeRA",
+                        //     "quantity"=>1
+                        // ],
+                        // [
+                        //     'price' => "price_1MhpQlD1o4I6a9G2xIODv49y",
+                        //     "quantity"=>1
+                        // ],
                     ],
                     "collection_method"=>"charge_automatically",
                     "default_payment_method"=>$intent["payment_method"],//STRIPE SUBSCRIPTION PRODUCT PRICE ID
@@ -42,7 +54,7 @@ class Payment{
                     "payment_settings"=>[
                         "save_default_payment_method"=>"on_subscription"
                     ],
-                    "billing_cycle_anchor"=>Carbon::now()->addMonths(1)->timestamp,
+                    //"billing_cycle_anchor"=>Carbon::now()->addMonths(1)->timestamp,
                     'off_session' => true
                     //'confirm' => true
                     // "expand" => ["latest_invoice.payment_intent"],
@@ -53,33 +65,33 @@ class Payment{
                 ]);
     
                 //do subscription
-                $subscription = $stripe->subscriptions->create([
-                    'customer' => $intent["customer"],
-                    'items' => [
-                        ['price' => config("payment.STRIPE_SUBSCRIPTION_PRICE_ID")],
-                    ],
-                    "collection_method"=>"charge_automatically",
-                    "default_payment_method"=>$intent["payment_method"],//STRIPE SUBSCRIPTION PRODUCT PRICE ID
-                    "currency"=>"gbp",
-                    "description"=>"Twin subscription server side",
-                    "payment_settings"=>[
-                        "save_default_payment_method"=>"on_subscription"
-                    ],
-                    "billing_cycle_anchor"=>Carbon::now()->addMonths(1)->timestamp,
-                    'off_session' => true
-                    //'confirm' => true
-                    // "expand" => ["latest_invoice.payment_intent"],
-                    // "application_fee_percent"=>$subscriptionProcessingFee,
-                    // "transfer_data" => [
-                    //   "destination" => $connected_acc_id
-                    // ]
-                ]);
+                // $subscription = $stripe->subscriptions->create([
+                //     'customer' => $intent["customer"],
+                //     'items' => [
+                //         ['price' => config("payment.STRIPE_SUBSCRIPTION_PRICE_ID")],
+                //     ],
+                //     "collection_method"=>"charge_automatically",
+                //     "default_payment_method"=>$intent["payment_method"],//STRIPE SUBSCRIPTION PRODUCT PRICE ID
+                //     "currency"=>"gbp",
+                //     "description"=>"Twin subscription server side",
+                //     "payment_settings"=>[
+                //         "save_default_payment_method"=>"on_subscription"
+                //     ],
+                //     "billing_cycle_anchor"=>Carbon::now()->addMonths(1)->timestamp,
+                //     'off_session' => true
+                //     //'confirm' => true
+                //     // "expand" => ["latest_invoice.payment_intent"],
+                //     // "application_fee_percent"=>$subscriptionProcessingFee,
+                //     // "transfer_data" => [
+                //     //   "destination" => $connected_acc_id
+                //     // ]
+                // ]);
     
                 //verify the subscription id
     
                 return [
                     "succes"=>true,
-                    "paymentIntent"=>$paymentIntent,
+                    //"paymentIntent"=>$paymentIntent,
                     "subscription"=>$subscription
                 ];
         }

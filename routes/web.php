@@ -132,8 +132,11 @@ Route::group(["prefix"=>"payments", "as"=>"payments."], function(){
         // ];
 
         if(isset($intent['id']) && $intent['status'] === "succeeded"){
-            return Payment::chargePayment($intent, $stripe);
+            //update customer payment default method...
+            $intent['payment_method']; //verified payment method id
+
         }
+        //eit id amer database -- childrens tabl 
 
         return [
             "msg"=>"Verifying intent has been failed",
@@ -145,5 +148,59 @@ Route::group(["prefix"=>"payments", "as"=>"payments."], function(){
 
 Route::get("get", function(){
     return round(1.33333333333);
+});
+
+Route::get("/subsciption-update", function(){
+    $stripe = new \Stripe\StripeClient(config("payment.STRIPE_SECRET_KEY")); //secret key
+
+    
+
+    $subscription = $stripe->subscriptions->retrieve('sub_1MhrKsGEZXyAAL0hp3uY0ghe');
+
+    //remove subscription item
+    // foreach( $subscription->items->data as $item){
+    //     if($item->id === "si_NSnizH1ryggzuW"){
+    //         $stripe->subscriptionItems->delete(
+    //             $item->id,
+    //             []
+    //         );
+    //     }
+    // }
+    // return "dne";
+
+    //update subscriptio item
+    // foreach( $subscription->items->data as $item){
+    //     if($item->id === "si_NSnZwxuuAyNEzO"){
+    //         $stripe->subscriptionItems->update(
+    //             [
+    //                 "quantity"=>1
+    //             ],
+    //             ['metadata' => ['order_id' => '6735']]
+    //         );
+    //     }
+    // }
+    
+
+    // return "DONE";
+    
+
+
+    //return $subscription->items->data[0]->id;
+    $stripe->subscriptions->update(
+    $subscription->id,
+    [
+        //'cancel_at_period_end' => false,
+        'proration_behavior' => "create_prorations",// 'create_prorations',
+        'proration_date' => Carbon::now()->addDays(1)->timestamp,//
+        'items' => [
+            [
+                'id' => $subscription->items->data[0]->id,
+                "price"=>"price_1MeOQPGEZXyAAL0hM7dQVEJG",
+                'quantity' => 3,
+            ],
+        ],
+    ]
+    );
+    return $subscription;
 });
 
