@@ -155,11 +155,11 @@ Route::get("/subsciption-update", function(){
 
     
 
-    $subscription = $stripe->subscriptions->retrieve('sub_1MhrKsGEZXyAAL0hp3uY0ghe');
+    $subscription = $stripe->subscriptions->retrieve('sub_id');
 
     //remove subscription item
     // foreach( $subscription->items->data as $item){
-    //     if($item->id === "si_NSnizH1ryggzuW"){
+    //     if($item->id === "item_id_here"){
     //         $stripe->subscriptionItems->delete(
     //             $item->id,
     //             []
@@ -170,7 +170,7 @@ Route::get("/subsciption-update", function(){
 
     //update subscriptio item
     // foreach( $subscription->items->data as $item){
-    //     if($item->id === "si_NSnZwxuuAyNEzO"){
+    //     if($item->id === "item_id_here"){
     //         $stripe->subscriptionItems->update(
     //             [
     //                 "quantity"=>1
@@ -195,7 +195,7 @@ Route::get("/subsciption-update", function(){
         'items' => [
             [
                 'id' => $subscription->items->data[0]->id,
-                "price"=>"price_1MeOQPGEZXyAAL0hM7dQVEJG",
+                "price"=>"price_id_here",
                 'quantity' => 3,
             ],
         ],

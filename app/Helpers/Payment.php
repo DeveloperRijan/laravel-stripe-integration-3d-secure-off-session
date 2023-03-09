@@ -35,15 +35,15 @@ class Payment{
                     'customer' => $intent["customer"],
                     'items' => [
                         [
-                            'price' => "price_1MeOQPGEZXyAAL0hM7dQVEJG",
+                            'price' => "price_id_here",
                             "quantity"=>1
                         ],
                         // [
-                        //     'price' => "price_1MhpPiD1o4I6a9G2JJ7zVeRA",
+                        //     'price' => "price_id_here",
                         //     "quantity"=>1
                         // ],
                         // [
-                        //     'price' => "price_1MhpQlD1o4I6a9G2xIODv49y",
+                        //     'price' => "price_id_here",
                         //     "quantity"=>1
                         // ],
                     ],
